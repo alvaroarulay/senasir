@@ -45,12 +45,9 @@
                     <table class="table table-hover table-bordered table-sm" id="sampleTable">
                         <thead class="thead-light">
                         <tr>
-                            <th>&nbsp;ACCIONES&nbsp;</th>
-                            <th>STICKER</th>
+                            <th>VER</th>
+                            <th>EDITAR</th>
                             <th>CÓDIGO</th>
-                            <th>GRUPO CONTABLE</th>
-                            <th>AUXLIAR</th>
-                            <th>VIDA ÚTIL</th>
                             <th>OFICINA</th>
                             <th>RESPONSABLE</th>
                             <th>DESCRIPCIÓN</th>
@@ -61,15 +58,14 @@
                         <tbody>
                             <tr v-for="articulo in arrayArticulo" :key="articulo.id">
                                 <td>
-                                    <button type="button" @click="mostrarEditar(articulo.id)" class="btn btn-success btn-sm"><i class="fa fa-eye"></i></button> 
-                                    <button type="button" @click="abrirModal('articulo','actualizar',articulo)" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></button>
-</td>
-                                <td><button type="button" @click="sticker(articulo.id)" class="btn btn-danger btn-sm"><i class="bi bi-file-pdf"></i></button>
-</td>
+                                    <button type="button" @click="ver(articulo.id)" class="btn btn-success btn-sm mb-3" data-toggle="tooltip" data-placement="top" title="Detalles"><i class="bi bi-eye" ></i></button>
+                                    <button type="button" @click="sticker(articulo.id)" class="btn btn-danger btn-sm mb-3" data-toggle="tooltip" data-placement="top" title="sticker"><i class="bi bi-file-pdf"></i></button>
+                                </td>
+                                <td>
+                                    <button type="button" @click="abrirModal(articulo)" class="btn btn-warning btn-sm mb-3" data-toggle="tooltip" data-placement="top" title="Editar Datos"><i class="bi bi-pencil-square"></i></button>
+                                    <button type="button" @click="editImage(articulo.id)" class="btn btn-warning btn-sm mb-3" data-toggle="tooltip" data-placement="top" title="Editar Imagenes"><i class="bi bi-card-image"></i></button>
+                                </td>
                                 <td v-text="articulo.codigo"></td>
-                                <td v-text="articulo.nombre"></td>
-                                <td v-text="articulo.nomaux"></td>
-                                <td v-text="articulo.vidautil"></td>
                                 <td v-text="articulo.nomofic"></td>
                                 <td v-text="articulo.nomresp"></td>
                                 <td v-text="articulo.descripcion"></td>
@@ -336,9 +332,9 @@
                             <div class="form-group row mb-3">
                                 <label class="col-md-3 form-control-label" for="text-input">Grupo Contable</label>
                                 <div class="col-md-9">
-                                    <select class="form-control" v-model="codcont" @change="onChange($event)">
-                                        <option value="0" disabled>Seleccione</option>
-                                        <option v-for="gcont in arrayContables" :key="gcont.codcont" :value="gcont.codcont" v-text="gcont.nombre"></option>
+                                    <select class="form-select" v-model="id_contable" @change="onChange($event)">
+                                        <option value="0">Seleccione...</option>
+                                        <option v-for="gcont in arrayContables" :key="gcont.id" :value="gcont.id" v-text="gcont.nombre"></option>
                                     </select>                                        
                                 </div>
                             </div>
@@ -346,37 +342,33 @@
                             <div class="form-group row mb-3">
                                 <label class="col-md-3 form-control-label" for="text-input">Auxiliar</label>
                                 <div class="col-md-9">
-                                    <select class="form-control" v-model="codaux">
-                                        <option v-for="aux in arrayAuxiliares" :key="aux.codaux" :value="aux.codaux" v-text="aux.nomaux"></option>
+                                    <select class="form-select" v-model="id_auxiliar">
+                                        <option value="0">Seleccione...</option>
+                                        <option v-for="aux in arrayAuxiliar" :key="aux.id" :value="aux.id" v-text="aux.nomaux"></option>
                                     </select>                                        
                                 </div>
                             </div>
                             <div class="form-group row mb-3">
                                 <label class="col-md-3 form-control-label" for="text-input">Descripción: </label>
                                 <div class="col-md-9">
-                                    <textarea class="form-control"  v-model="descripcion" ></textarea>
+                                    <textarea class="form-control"  v-model="descripcion_inicial" ></textarea>
                                 </div>
                             </div>
                             <div class="form-group row mb-3">
                                 <label class="col-md-3 form-control-label" for="text-input">Observaciones: </label>
                                 <div class="col-md-9">
-                                    <textarea class="form-control"  v-model="observaciones" ></textarea>
+                                    <textarea class="form-control"  v-model="observ_inicial" ></textarea>
                                 </div>
                             </div>
                             <div class="form-group row mb-3">
                                 <label class="col-md-3 form-control-label" for="text-input">Estado: </label>
                                 <div class="col-md-9">
-                                    <select class="form-control" v-model="codestado" @change="onChangeCodEstado($event)">
-                                        <option value='1'>BUENO</option>
-                                        <option value='2'>REGULAR</option>
-                                        <option value='3'>MALO</option>
+                                    <select class="form-select" v-model="estado_nuevo" @change="onChangeCodEstado($event)">
+                                        <option value="0">Seleccione...</option>
+                                        <option value="1">BUENO</option>
+                                        <option value="2">REGULAR</option>
+                                        <option value="3">MALO</option>
                                     </select>                                        
-                                </div>
-                            </div>
-                            <div class="form-group row mb-3">
-                                <label class="col-md-3 form-control-label" for="text-input">Código Secundario: </label>
-                                <div class="col-md-9">
-                                    <input type="text"  class="form-control" placeholder="" v-model="codigosec">                                        
                                 </div>
                             </div>
                             <div v-show="errorArticulo" class="form-group row div-error mb-3">
@@ -386,28 +378,18 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="mb-3">
-                                <input class="form-control"  type="file" @change="uploadImage" accept="image/*">
-                                </div>
-                                <div class="row">
-                                <div v-for="image in selectedImages" :key="image.id" class="thumbnails float-left mr-1 col-sm-12 col-md-3">
-                                        <img :src="image.url" alt="Miniatura" class="img-responsive" style="width: 100px; height: auto;">
-                                </div>
-                                    <button class="btn btn-primary" @click="subirImagenes(id_actual)">Subir Imagenes</button>
-                            </div>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" @click="cerrarModal()">Cerrar</button>
-                        <button type="button" v-if="tipoAccion==2" class="btn btn-primary" @click="actualizarArticulo()">Actualizar</button>
+                        <button type="button" class="btn btn-primary" @click="actualizarArticulo()">Actualizar</button>
                     </div>
                 </div>
                 <!-- /.modal-content -->
             </div>
                 <!-- /.modal-dialog -->
         </div>
-        <!--Fin del modal-->
+        <!--modal ver-->
         <div class="modal fade" tabindex="-1" :class="{'mostrar' : modalver}" role="dialog" aria-labelledby="myModalLabel" style="overflow-y: scroll;" aria-hidden="true">
             <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
@@ -419,75 +401,77 @@
                     </div>
                     <div class="modal-body">
                         <div class="container" >
-    <div class="row">
-        <div class="col-md-6">
-            <div class="bs-component">
-                    <div class="card">
-                        <h4 class="card-header">CODIGO ACTIVO FIJO: </h4>
-                        <div class="card-body">
-                            <div class="row mb-3">
+                            <div class="row">
                                 <div class="col-md-6">
-                                    <h5 class="card-title">Grupo Contable:</h5>
-                                    <h6 class="card-subtitle text-muted"></h6> 
+                                    <div class="bs-component">
+                                            <div class="card">
+                                                <h4 class="card-header">CODIGO ACTIVO FIJO: </h4>
+                                                <div class="card-body">
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <h5 class="card-title">Grupo Contable:</h5>
+                                                            <h6 class="card-subtitle text-muted" v-text="nombre_contable"></h6> 
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                        <h5 class="card-title">Auxiliar:</h5>
+                                                            <h6 class="card-subtitle text-muted" v-text="nombre_auxiliar"></h6> 
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <h5 class="card-title">Oficina:</h5>
+                                                            <h6 class="card-subtitle text-muted" v-text="nombre_oficina"></h6> 
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                        <h5 class="card-title">Responsable:</h5>
+                                                            <h6 class="card-subtitle text-muted" v-text="nombre_responsable"></h6> 
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <h5 class="card-title">Costo:</h5>
+                                                            <h6 class="card-subtitle text-muted" v-text="costo_ver"></h6> 
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                        <h5 class="card-title">Fecha de incorporación:</h5>
+                                                            <h6 class="card-subtitle text-muted" v-text="fecha_incorporacion_ver"></h6> 
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-6">
+                                                            <h5 class="card-title">Vida Útil:</h5>
+                                                            <h6 class="card-subtitle text-muted" v-text="vida_util_ver"></h6> 
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                        <h5 class="card-title">Estado:</h5>
+                                                            <h6 class="card-subtitle text-muted" v-if="estado_ver==1">Bueno</h6>
+                                                            <h6 class="card-subtitle text-muted" v-if="estado_ver==2">Regular</h6>
+                                                            <h6 class="card-subtitle text-muted" v-if="estado_ver==3">Malo</h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="mb-3">
+                                                        <h5 class="card-title">Detalle:</h5>
+                                                        <h6 class="card-subtitle text-muted" v-text="descripcion_ver"></h6>
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer text-muted">Ultima Actualización: <span v-text="updated_at"></span></div>
+                                            </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                <h5 class="card-title">Auxiliar:</h5>
-                                    <h6 class="card-subtitle text-muted"></h6> 
+                                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                                            <div v-for="image in imagenes" :key="image.id" class="col">
+                                                <div class="card">
+                                                    <img :src="getImageUrl(image)" :alt="image.nombre"  class="img-thumbnail img-fluid" />
+                                                </div>
+                                            </div>
+                                    </div>
+                                
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <h5 class="card-title">Oficina:</h5>
-                                    <h6 class="card-subtitle text-muted"></h6> 
-                                </div>
-                                <div class="col-md-6">
-                                <h5 class="card-title">Responsable:</h5>
-                                    <h6 class="card-subtitle text-muted"></h6> 
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <h5 class="card-title">Costo:</h5>
-                                    <h6 class="card-subtitle text-muted"><b>Bs.- </b></h6> 
-                                </div>
-                                <div class="col-md-6">
-                                <h5 class="card-title">Fecha de incorporación:</h5>
-                                    <h6 class="card-subtitle text-muted"></h6> 
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <h5 class="card-title">Vida Útil:</h5>
-                                    <h6 class="card-subtitle text-muted"> año(s)</h6> 
-                                </div>
-                                <div class="col-md-6">
-                                <h5 class="card-title">Estado:</h5>
-                                    <h6 class="card-subtitle text-muted">Malo</h6>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <h5 class="card-title">Detalle:</h5>
-                                <h6 class="card-subtitle text-muted"></h6>
-                            </div>
-                        </div>
-                        <div class="card-footer text-muted">Ultima Actualización: </div>
-                    </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="row row-cols-1 row-cols-md-2 g-4">
-                    <div v-for="image in imagenes" :key="image.id" class="col">
-                        <div class="card">
-                            <img :src="getImageUrl(image)" :alt="image.nombre"  class="img-thumbnail img-fluid" />
-                        </div>
-                    </div>
-            </div>
-          
-        </div>
-    </div>
-</div>               
+                        </div>               
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" @click="cerrarModalImage()">Cerrar</button>
@@ -537,20 +521,21 @@
                     //auxiliares
                     id_auxiliar : 0,
                     arrayAuxiliar : [],
-                    //actuales
-                    id_actual:0,
-                    codigo : '',
-                    codcont:0,
-                    codaux:0,
-                    descripcion : '',  
-                    observaciones : '',      
-                    codestado : 0,
-                    estadoasignacion :0,
-                    codigosec:0,
-                    articulo_id: 0,
-                    popUp: false,
-                    idArticulo:0,
+                    //actuales ver 
+                    nombre_contable:'',
+                    nombre_auxiliar:'',
+                    nombre_oficina:'',
+                    nombre_responsable:'',
+                    costo_ver:0,
+                    fecha_incorporacion_ver:'',
+                    vida_util_ver:0,
+                    estado_ver:0,
+                    descripcion_ver:'',
+                    updated_at:'',
 
+
+                    id_actual:0,
+                  
                     idunidad:1,
                     unidad:'',
                     arrayUnidad:[],
@@ -567,7 +552,6 @@
                     modal : 0,
                     modalver : 0,
                     tituloModal : '',
-                    tipoAccion : 0,
                     errorArticulo : 0,
                     errorMostrarMsjArticulo : [],
                     pagination : {
@@ -718,6 +702,7 @@
                     this.id_responsable = 0;
                     this.idunidad=(event.target.value);
                     const res = this.arrayUnidad.find((unidad) => unidad.id == this.idunidad);
+                    this.unidad = res.descrip;
                     this.listarOficina(res.id);
                     this.listarContables(res.id);
                 },
@@ -797,7 +782,6 @@
                         var respuesta= response.data;
                         me.arrayArticulo = respuesta.actuales.data;
                         me.pagination= respuesta.pagination;
-                       
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -831,46 +815,21 @@
                     //Envia la petición para visualizar la data de esa página
                     me.listarArticulo(page,buscar,criterio);
                 },
-                abrirModal(modelo, accion, data = []){
-                    switch(modelo){
-                    case "articulo":
-                    {
-                        switch(accion){
-                            case 'registrar':
-                            {
-                                this.modal=1;
-                                this.tituloModal='Nuevo Artículo: ';
-                                this.idArticulo =0;
-                                this.codigo = '';
-                                this.codcont= '';
-                                this.codaux = '';
-                                this.descripcion ='';
-                                this.observaciones = '';
-                                this.codestado ='';
-                                this.codigosec='';
-                                this.tipoAccion=1;
-                                break;
-                            }
-                            case 'actualizar':
-                            {
-                                this.listarAuxiliar(data['codcont']);
-                                this.modal=1;
-                                this.tituloModal='Actualizar Artículo: '+ data['codigo'];
-                                this.idArticulo =data['id'];
-                                this.codigo = data['codigo'];
-                                this.codcont= data['codcont'];
-                                this.codaux = data['codaux'];
-                                this.descripcion = data['descripcion'];
-                                this.observaciones = data['observ'];
-                                this.codestado =data['codestado'];
-                                this.codigosec=data['codigosec'];
-                                this.tipoAccion=2;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    }
+                abrirModal( data = []){
+                    this.listarContables(data['idunidad']);
+                    this.listarAuxiliar(data['idcontable']);
+
+                    this.modal=1;
+                    this.tituloModal='Actualizar Artículo: '+ data['codigo'];
+
+                    this.id_actual = data['id'];
+                    this.id_contable = data['idcontable'];
+                    this.id_auxiliar = data['idauxiliar'];
+                    this.descripcion_inicial = data['descripcion'];
+                    this.observ_inicial = data['observ'];
+                    this.estado_nuevo =data['estado'];
+                    this.codigosec=data['codigosec'];
+                    this.tipoAccion=2;
                 },
                 onChange(event) {
                     this.listarAuxiliar(event.target.value);
@@ -925,39 +884,38 @@
                     });
                     
                 },
-                
+                editImage(id){},
                 actualizarArticulo(){
                     if (this.validarArticulo()){
                     return;
                     }
                     let me = this;
                 axios.put('/actual/actualizar',{
-                    'id': this.idArticulo,
-                    'codigo':this.codigo,
-                    'codcont': this.codcont,
-                    'codaux': this.codaux,
-                    'descripcion' : this.descripcion,
-                    'observacion' : this.observaciones,
-                    'estado' : this.codestado,
-                    'codsec' : this.codigosec
+                    'id': this.id_actual,
+                    'codaux': this.id_auxiliar,
+                    'descripcion' : this.descripcion_inicial,
+                    'observacion' : this.observ_inicial,
+                    'estado' : this.estado_nuevo
                 }).then(function (response) {
                     me.cerrarModal();
                     me.listarArticulo(1,'','descripcion');
                     Swal.fire(response.data.message, "", "success");
                 }).catch(function (error) {
                     Swal.fire(error.response.data, "", "error");
+                    console.log(error.response.data);
                 }); 
                 },
                 cerrarModal(){
                     this.modal=0;
                     this.codigo = '';
-                    this.descripcion = '';
-                    this.codcont=0;
-                    this.codaux=0;    
-                    this.codestado =0;
-                    this.estadoasignacion =0;
-                    this.codigosec=0;
+                    this.descripcion_inicial = '';
+                    this.id_contable=0;
+                    this.id_auxiliar=0;    
+                    this.estado_nuevo =0;
                     this.errorArticulo=0;
+                    this.errorMostrarMsjArticulo =[];
+                    this.arrayAuxiliar = [];
+                    this.arrayContables = [];
                     this.selectedImages= [];
                 },
                 cerrarModalImage(){
@@ -967,13 +925,13 @@
                 validarArticulo(){
                     this.errorArticulo=0;
                     this.errorMostrarMsjArticulo =[];
-                    if (this.descripcion.length >= 151) this.errorMostrarMsjArticulo.push("La descripción no puede ser mas de 150 caracteres.");
+                    if (this.descripcion_inicial.length >= 151) this.errorMostrarMsjArticulo.push("La descripción no puede ser mas de 150 caracteres.");
 
                     if (this.errorMostrarMsjArticulo.length) this.errorArticulo = 1;
 
                     return this.errorArticulo;
                 },
-                mostrarEditar(id){
+                ver(id){
                     let me = this;
                     me.id_actual=id;
                     axios.get('/image/ver/' + id).then((response) =>{
@@ -986,6 +944,22 @@
                     }).catch((error)=> {
                     Swal.fire("Existe un Problema ", "", "error");
                     }); 
+                    axios.get('/actuales/ver/'+id).then((response)=>{
+                        var respuesta = response.data.actual;
+                        console.log(respuesta);
+                        me.nombre_contable = respuesta.nombre;
+                        me.nombre_auxiliar = respuesta.nomaux;
+                        me.nombre_oficina = respuesta.nomofic;
+                        me.nombre_responsable = respuesta.nomresp;
+                        me.costo_ver = respuesta.costo;
+                        me.fecha_incorporacion_ver = new Date(respuesta.incorporacion).toLocaleString();
+                        me.vida_util_ver = respuesta.vidautil;
+                        me.estado_ver = respuesta.estado;
+                        me.descripcion_ver = respuesta.descripcion;
+                        me.updated_at = new Date(respuesta.updated_at).toLocaleString();
+                    }).catch((error=>{
+                        Swal.fire("Existe un Problema " , error.response.data, "error");
+                    }));
                 },
                 getImageUrl(image) {
                     return `/images/${image.nombre}`;

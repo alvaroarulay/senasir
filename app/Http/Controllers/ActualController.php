@@ -28,23 +28,25 @@ class ActualController extends Controller
         $criterio = $request->criterio;
 
         if ($buscar==''){
-        $actuales = Actual::join('auxiliar','actual.codaux','=','auxiliar.id')
-        ->join('codcont','auxiliar.codcont','=','codcont.id')
-        ->join('resp','actual.codresp','=','resp.id')
-        ->join('oficina','resp.codofic','=','oficina.id')
-        ->select('actual.id','actual.codigo','codcont.nombre',
-        'auxiliar.nomaux','actual.vidautil','oficina.nomofic','resp.nomresp',
-        'actual.descripcion','actual.estado','actual.estadoasignacion',
-        'actual.codsec','actual.observ')->paginate(5);
+            $actuales = Actual::join('auxiliar','actual.codaux','=','auxiliar.id')
+            ->join('codcont','auxiliar.codcont','=','codcont.id')
+            ->join('unidadadmin','unidadadmin.id','=','codcont.unidad')
+            ->join('resp','actual.codresp','=','resp.id')
+            ->join('oficina','resp.codofic','=','oficina.id')
+            ->select('actual.id','actual.codigo','codcont.nombre','unidadadmin.id as idunidad','unidadadmin.unidad',
+            'auxiliar.nomaux','actual.vidautil','oficina.nomofic','resp.nomresp','codcont.id as idcontable',
+            'actual.descripcion','actual.estado','actual.estadoasignacion','auxiliar.id as idauxiliar',
+            'actual.codsec','actual.observ')->paginate(5);
         }
         else{
             $actuales = Actual::join('auxiliar','actual.codaux','=','auxiliar.id')
             ->join('codcont','auxiliar.codcont','=','codcont.id')
+            ->join('unidadadmin','unidadadmin.id','=','codcont.unidad')
             ->join('resp','actual.codresp','=','resp.id')
             ->join('oficina','resp.codofic','=','oficina.id')
-            ->select('actual.id','actual.codigo','codcont.nombre',
-            'auxiliar.nomaux','actual.vidautil','oficina.nomofic','resp.nomresp',
-            'actual.descripcion','actual.estado','actual.estadoasignacion',
+            ->select('actual.id','actual.codigo','codcont.nombre','unidadadmin.id as idunidad','unidadadmin.unidad',
+            'auxiliar.nomaux','actual.vidautil','oficina.nomofic','resp.nomresp','codcont.id as idcontable',
+            'actual.descripcion','actual.estado','actual.estadoasignacion','auxiliar.id as idauxiliar',
             'actual.codsec','actual.observ')
             ->where('actual.'.$criterio, 'like', '%'. $buscar . '%')->paginate(5);           
         }
@@ -94,12 +96,15 @@ class ActualController extends Controller
     }
     public function show($id)
     {
-        $actual = Actual::find($id);
-        $responsable = Responsables::select('nomresp')->where('codresp','=',$actual->codresp)->where('codofic','=',$actual->codofic)->first();
-        $codcont = CodigoContable::select('nombre')->where('codcont','=',$actual->codcont)->first();
-        $auxiliar = Auxiliares::select('nomaux')->where('codaux','=',$actual->codaux)->first();
-        $oficina = Oficinas::select('nomofic')->where('codofic','=',$actual->codofic)->first();
-        return view('actuales.ver', ['actual' => $actual,'responsable'=>$responsable,'codcont'=>$codcont,'auxiliar'=>$auxiliar,'oficina'=>$oficina]);
+        $actual = Actual::join('auxiliar','actual.codaux','=','auxiliar.id')
+        ->join('codcont','auxiliar.codcont','=','codcont.id')
+        ->join('resp','actual.codresp','=','resp.id')
+        ->join('oficina','resp.codofic','=','oficina.id')
+        ->select('actual.id','actual.codigo','codcont.nombre','actual.costo','actual.incorporacion','actual.updated_at',
+        'auxiliar.nomaux','actual.vidautil','oficina.nomofic','resp.nomresp',
+        'actual.descripcion','actual.estado','actual.estadoasignacion',
+        'actual.codsec','actual.observ')->where('actual.id','=',$id)->first();
+        return ['actual'=>$actual];
     }
     public function update(Request $request)
     {
@@ -110,25 +115,16 @@ class ActualController extends Controller
         $contcodaux = $articuloant->codaux != $request->codaux ? true : false;
         $contdescripcion = $articuloant->descripcion != $request->descripcion ? true : false;
         $contobserv = $articuloant->observ != $request->observacion ? true : false;
-        $contcodestado = $articuloant->codestado != $request->estado ? true : false;
-        $contcodsec = $articuloant->codigosec != $request->codsec ? true : false;
-
+        $contcodestado = $articuloant->estado != $request->estado ? true : false;
+        
         $articulo = Actual::findOrFail($request->id);
         $articulo->codaux = $request->codaux;
         $articulo->descripcion = $request->descripcion;
         $articulo->observ = $request->observacion;
-        $articulo->codestado = $request->estado;
-        $articulo->codigosec = $request->codsec;
-        $articulo->codimage= $request->id;
+        $articulo->estado = $request->estado;
         $articulo->save();
 
-        if ($contcodcont){
-        $logs = new Logs();
-        $logs->codactual = $request->id;
-        $logs->descripcion = 'Se Modifico el Grupo Contable';
-        $logs->user = auth()->user()->name;
-        $logs->save();
-        };
+       
         if ($contcodaux){
         $logs = new Logs();
         $logs->codactual = $request->id;
@@ -154,13 +150,6 @@ class ActualController extends Controller
         $logs = new Logs();
         $logs->codactual = $request->id;
         $logs->descripcion = 'Se Modifico el Estado del Activo';
-        $logs->user = auth()->user()->name;
-        $logs->save();
-        };
-        if ($contcodsec){
-        $logs = new Logs();
-        $logs->codactual = $request->id;
-        $logs->descripcion = 'Se Modifico el código Secundario';
         $logs->user = auth()->user()->name;
         $logs->save();
         };
@@ -276,19 +265,17 @@ class ActualController extends Controller
 
         $asignacion = New Asignaciones();
         $asignacion->codactual = $request->id;
-        $asignacion->codresp = $articuloant->codresp ;
-        $asignacion->codofic = $articuloant->codofic;
+        $asignacion->codresp = $articuloant->codresp;
         $asignacion->usuario = \Auth::user()->name;
         $asignacion->save();
                 
         $articulo = Actual::findOrFail($request->id);
-        $articulo->codresp = $request->codresp2;
-        $articulo->codofic = $request->codofic2;
+        $articulo->codresp = $request->id;
         $articulo->save();
         
         $logs = new Logs();
         $logs->codactual = $request->id;
-        $logs->descripcion = 'Se Modifico el Responsable y Oficina';
+        $logs->descripcion = 'Se Modifico el Responsable.';
         $logs->user = \Auth::user()->name;
         $logs->save();
         
@@ -299,20 +286,12 @@ class ActualController extends Controller
         Date::setLocale('es');
         $fechaTitulo = Date::now()->format('l j F Y');
         $fechDerecha = Date::now()->format('d/M/Y');
-        $datos = Actual::join('auxiliar',function ($join) {
-                                        $join->on('actual.codaux', '=', 'auxiliar.codaux');
-                                            $join->on('actual.unidad', '=', 'auxiliar.unidad');
-                                            $join->on('actual.codcont', '=', 'auxiliar.codcont');
-                                    })
-                                    ->join('estado','actual.codestado','=','estado.id')
-                                    ->select('actual.codigo','actual.codaux','auxiliar.nomaux','estado.nomestado', 'actual.descripcion',)
-                                    ->where('actual.codresp','=',$request->codresp)
-                                    ->where('actual.codofic','=',$request->codofic)->get();
-        $responsable = Responsables::join('oficina','resp.codofic','=','oficina.codofic')
-                                    ->join('cla_depts','resp.cod_exp','=','cla_depts.id')
-                                    ->select('resp.nomresp','oficina.nomofic','resp.cargo','oficina.codofic','resp.ci','cla_depts.sigla')
-                                    ->where('resp.codresp','=',$request->codresp)
-                                    ->where('resp.codofic','=',$request->codofic)->first();
+        $datos = Actual::join('auxiliar','actual.codaux', '=', 'auxiliar.id')
+                                    ->select('actual.codigo','actual.codaux','auxiliar.nomaux','actual.estado', 'actual.descripcion',)
+                                    ->where('actual.codresp','=',$request->codresp)->get();
+        $responsable = Responsables::join('oficina','resp.codofic','=','oficina.id')
+                                    ->select('resp.nomresp','oficina.nomofic','resp.cargo','oficina.id','resp.ci','resp.expedicion')
+                                    ->where('resp.id','=',$request->codresp)->first();
         $total = $datos->count();
         $pdf=Pdf::loadView('plantillapdf.repAsignacion',['datos'=>$datos,'responsable'=>$responsable,'fechaTitulo'=>$fechaTitulo,'fechaDerecha'=>$fechDerecha,'total'=>$total]);
         $pdf->set_paper(array(0,0,800,617));
@@ -350,10 +329,10 @@ class ActualController extends Controller
         $criterio = $request->criterio;
 
         if ($buscar==''){
-            $actuales = Actual::select('id','codigo','codresp','codofic','descripcion','codestado')->where('estadoasignacion','=','0')->paginate(5);
+            $actuales = Actual::select('id','codigo','codresp','descripcion','estado')->where('estadoasignacion','=','0')->paginate(5);
         }
         else{
-            $actuales = Actual::select('id','codigo','codresp','codofic','descripcion','codestado')->where('estadoasignacion','=','0')->where('actual.'.$criterio, 'like', '%'. $buscar . '%')->paginate(5);
+            $actuales = Actual::select('id','codigo','codresp','descripcion','estado')->where('estadoasignacion','=','0')->where('actual.'.$criterio, 'like', '%'. $buscar . '%')->paginate(5);
         }
         return [
                 'pagination' => [

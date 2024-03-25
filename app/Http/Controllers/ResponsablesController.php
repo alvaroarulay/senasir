@@ -22,14 +22,12 @@ class ResponsablesController extends Controller
         
         if ($buscar==''){
             $responsables = Responsables::join('oficina', 'resp.codofic','=','oficina.id')
-            ->join('unidadadmin', 'unidadadmin.id','=','oficina.unidad')
-            ->select('resp.nomresp','resp.ci','resp.expedicion','resp.cargo','oficina.nomofic','unidadadmin.unidad','resp.estado')
+            ->select('resp.id','resp.nomresp','resp.ci','resp.expedicion','resp.cargo','oficina.nomofic','resp.estado')
             ->paginate(10);
         }
         else{
             $responsables = Responsables::join('oficina', 'resp.codofic','=','oficina.id')
-            ->join('unidadadmin', 'unidadadmin.id','=','oficina.unidad')
-            ->select('resp.nomresp','resp.ci','resp.expedicion','resp.cargo','oficina.nomofic','unidadadmin.unidad','resp.estado')
+            ->select('resp.id','resp.nomresp','resp.ci','resp.expedicion','resp.cargo','oficina.nomofic','resp.estado')
             ->where('resp.'.$criterio, 'like', '%'. $buscar . '%')
             ->orderBy('resp.id', 'desc')->paginate(10);
         }

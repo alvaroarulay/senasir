@@ -91,7 +91,6 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::get('/actual/repAsignaciones', 'ActualController@repAsignaciones');
         Route::get('/actual/repDevoluciones', 'ActualController@repDevoluciones');
         Route::get('/actuales/inventario', 'ActualController@buscarActivoEstado');
-        
         //Route::name('print')->get('/imprimir', 'ActualController@imprimir');
         Route::post('/image/crear', 'ImageController@create')->name('image.crear');
         Route::get('/image/ver/{id}', 'ImageController@show')->name('image.ver');

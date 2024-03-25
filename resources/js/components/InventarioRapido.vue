@@ -169,10 +169,10 @@
                                         <td v-text="responsable.nomresp"></td>
                                         <td v-text="responsable.ci"></td>
                                         <td>
-                                        <div v-if="responsable.api_estado==1">
+                                        <div v-if="responsable.estado==1">
                                             <span class="me-1 badge badge-pill bg-success">Activo</span>
                                         </div>
-                                        <div v-else-if="responsable.api_estado==3">
+                                        <div v-else-if="responsable.estado==3">
                                             <span class="me-1 badge badge-pill bg-danger">Inactivo</span>
                                         </div>
                                         
@@ -355,7 +355,7 @@ export default {
         axios.get(url).then((response)=>{
             me.arrayResponsable = response.data.responsable;
             console.log(me.arrayResponsable);
-            if (me.arrayResponsable.api_estado==1 || data.api_estado==null) {
+            if (me.arrayResponsable.estado == 1 || me.arrayResponsable.length == 0) {
               me.codresp=me.arrayResponsable.codresp;
               me.codofic=me.arrayResponsable.codofic;
               me.nomresp=me.arrayResponsable.nomresp;
@@ -374,6 +374,7 @@ export default {
         let me=this;
         var url= '/responsable/?page=' + page + '&buscar='+ buscar + '&criterio='+ criterio;
         axios.get(url).then( (response) =>{
+          console.log(response.data);
             var respuesta = response.data;
             me.arrayResponsableTodos = respuesta.responsables.data;
             me.pagination= respuesta.pagination;
@@ -465,7 +466,7 @@ export default {
         this.criterio='descripcion';
     }, 
     abrirModal(){  
-      this.criterio="nomresp";
+        this.criterio="nomresp";
         this.modal = 1;
         this.listarResponsable(1,this.buscar,this.criterio);
         
@@ -475,14 +476,14 @@ export default {
       this.listarArticulo (1,this.buscar,this.criterio2);
     },
     agregarDetalleModal(data){
-      if(data.api_estado==1 || data.api_estado==null){
+
+      if(data.estado == 1){
+        this.codresp=data.id;
         this.ci=data.ci;
         this.nomresp=data.nomresp;
         this.cargo=data.cargo;
         this.oficina=data.nomofic;
         this.modal=0;
-        this.codresp=data.codresp;
-        this.codofic=data.codofic;
       }
       else{
         Swal.fire('El Responsable no se encuentra activo!!','','error');
@@ -508,27 +509,30 @@ export default {
       let me = this;
       if(me.arrayActivo.length==0){
         swal.fire('Ingrese un Activo','','info');
+        
       }else
       {
         if(me.codresp==0){
           swal.fire('Selecciona un Responsable','','info');
         }
         else{
+          
           let me = this;
           for (let i = 0; i < me.arrayActivo.length; i++) {
+            let id_responsable = this.codresp;
             axios.put('/actual/actualizarasingacion',{
                 'id' : me.arrayActivo[i].id,
                 'codigo' : me.arrayActivo[i].codigo,
-                'codresp2':me.codresp,
-                'codofic2':me.codofic,
+                'codresp2':id_responsable
             }).then((response)=>{
               Swal.fire(response.data.message, "", "success");
-              window.open('http://senasirprueba.test/actual/repAsignaciones?codofic=' + me.codofic + '&codresp='+ me.codresp +  '','_blank');
-              me.reset();
             }).catch((error)=>{
                 console.log(error);
             });
             }
+            
+            
+            window.open('http://senasirprueba.test/actual/repAsignaciones?codresp='+ me.codresp +  '','_blank');
         }
       }
     },
