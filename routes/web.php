@@ -41,8 +41,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
          * Login Routes
          */
         
-        
-
+      
         Route::get('/actuales/actualver/{id}', 'ActualController@verinvitado')->name('actuales.actualver');
 
     });
@@ -54,6 +53,17 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         
         Route::get('/home', 'HomeController@index')->name('home.index');
         Route::get('/logout', 'LogoutController@perform')->name('logout.perform');
+
+        Route::get('/posts', 'PostController@index');
+        Route::post('/posts/crear', 'PostController@store');
+        
+        Route::get('markAsRead', function(){
+            auth()->user()->unreadNotifications->markAsRead();
+            return redirect()->back();
+        })->name('markAsRead');
+    
+        Route::post('/mark-as-read', 'PostController@markNotification')->name('markNotification');
+
         //Route::get('/codcont', 'CodigoContableController@index')->name('codconts');
         //Route::post('/auxiliar', 'CodigoContableController@auxiliar')->name('auxiliar');
         //Route::get('/codcont/crear', 'CodigoContableController@create')->name('codconts.crear');

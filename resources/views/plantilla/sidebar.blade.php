@@ -10,6 +10,12 @@
       <ul class="app-menu">
         <li @click="menu=0"><a class="app-menu__item" href="#"><i class="app-menu__icon fa fa-dashboard"></i><span class="app-menu__label">Escritorio</span></a></li>
         <li @click="menu=1"><a class="app-menu__item" href="#"><i class="bi bi-database-fill-gear"></i><span class="app-menu__label">&nbsp;&nbsp;Base de Datos</span></a></li>
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="bi bi-cash-coin"></i><span class="app-menu__label">&nbsp;&nbsp;Perfil</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+          <ul class="treeview-menu">
+            <li @click="menu=101"><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Mis datos</a></li>
+            <li @click="menu=102"><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Mis Mensajes</a></li>
+          </ul>
+        </li>
         <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="bi bi-cash-coin"></i><span class="app-menu__label">&nbsp;&nbsp;Activos</span><i class="treeview-indicator fa fa-angle-right"></i></a>
           <ul class="treeview-menu">
             <li @click="menu=2"><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Activos Fijos</a></li>
@@ -60,6 +66,12 @@
        @elseif (Auth::user()->idrol == 2)
        <ul class="app-menu">
         <li @click="menu=0"><a class="app-menu__item" href="#"><i class="app-menu__icon fa fa-dashboard"></i><span class="app-menu__label">Escritorio</span></a></li>
+        <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="bi bi-cash-coin"></i><span class="app-menu__label">&nbsp;&nbsp;Perfil</span><i class="treeview-indicator fa fa-angle-right"></i></a>
+          <ul class="treeview-menu">
+            <li @click="menu=101"><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Mis datos</a></li>
+            <li @click="menu=102"><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Mis Mensajes</a></li>
+          </ul>
+        </li>
         <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i class="bi bi-cash-coin"></i><span class="app-menu__label">&nbsp;&nbsp;Activos</span><i class="treeview-indicator fa fa-angle-right"></i></a>
           <ul class="treeview-menu">
             <li @click="menu=2"><a class="treeview-item" href="#"><i class="icon fa fa-circle-o"></i> Activos Fijos</a></li>

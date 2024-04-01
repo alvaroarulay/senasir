@@ -48,8 +48,7 @@ class UsersController extends Controller
         $user->username = $request->username;
         $user->password = Hash::make( $request->password);
         $user->condicion = 1;
-        $user->codresp = $request->codresp;
-        $user->codofic = $request->codofic;    
+        $user->codresp = $request->codresp;   
         $user->idrol = $request->idrol;
         $user->save();
         return response()->json(['message' => 'Usuario Creado Correctamente!!!']);

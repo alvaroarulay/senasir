@@ -25,49 +25,53 @@
       <!-- Navbar Right Menu-->
       <ul class="app-nav">
       <li class="dropdown"><a class="app-nav__item" href="#" data-bs-toggle="dropdown" aria-label="Show notifications"><i class="bi bi-bell fs-5"></i></a>
+          <!-- Notifications Dropdown Menu -->
           <ul class="app-notification dropdown-menu dropdown-menu-right">
-            <li class="app-notification__title">You have 4 new notifications.</li>
-            <div class="app-notification__content">
-              <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i class="bi bi-envelope fs-4 text-primary"></i></span>
-                  <div>
-                    <p class="app-notification__message">Lisa sent you a mail</p>
-                    <p class="app-notification__meta">2 min ago</p>
-                  </div></a></li>
-              <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i class="bi bi-exclamation-triangle fs-4 text-warning"></i></span>
-                  <div>
-                    <p class="app-notification__message">Mail server not working</p>
-                    <p class="app-notification__meta">5 min ago</p>
-                  </div></a></li>
-              <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i class="bi bi-cash fs-4 text-success"></i></span>
-                  <div>
-                    <p class="app-notification__message">Transaction complete</p>
-                    <p class="app-notification__meta">2 days ago</p>
-                  </div></a></li>
-              <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i class="bi bi-envelope fs-4 text-primary"></i></span>
-                  <div>
-                    <p class="app-notification__message">Lisa sent you a mail</p>
-                    <p class="app-notification__meta">2 min ago</p>
-                  </div></a></li>
-              <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i class="bi bi-exclamation-triangle fs-4 text-warning"></i></span>
-                  <div>
-                    <p class="app-notification__message">Mail server not working</p>
-                    <p class="app-notification__meta">5 min ago</p>
-                  </div></a></li>
-              <li><a class="app-notification__item" href="javascript:;"><span class="app-notification__icon"><i class="bi bi-cash fs-4 text-success"></i></span>
-                  <div>
-                    <p class="app-notification__message">Transaction complete</p>
-                    <p class="app-notification__meta">2 days ago</p>
-                  </div></a></li>
-            </div>
-            <li class="app-notification__footer"><a href="#">See all notifications.</a></li>
-          </ul>
+          <li class="nav-item dropdown">
+                <a class="nav-link" data-toggle="dropdown" href="#">
+                  <i class="fas fa-bell"></i>
+                    @if (count(Auth::user()->unreadNotifications()))
+                    <span class="badge badge-warning">{{ count(Auth::user()->unreadNotifications()) }}</span>
+                        
+                    @endif
+                  </span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                <span class="dropdown-header" >Unread Notifications</span>
+                  @forelse (Auth::user()->unreadNotifications() as $notification)
+                  <a href="#" class="dropdown-item">
+                    <i class="fas fa-envelope mr-2"></i> {{ $notification->data['title'] }}
+                    <span class="ml-3 pull-right text-muted text-sm">{{ $notification->created_at->diffForHumans() }}</span>
+                  </a>
+                  @empty
+                    <span class="ml-3 pull-right text-muted text-sm">Sin notificaciones por leer </span>  
+                  @endforelse
+                  
+                  <div class="dropdown-divider"></div>
+                  <span class="dropdown-header">Read Notifications</span>
+                  @forelse (Auth::user()->unreadNotifications() as $notification)
+                  <a href="#" class="dropdown-item">
+                    <i class="fas fa-users mr-2"></i> {{ $notification->data['description'] }}
+                    <span class="ml-3 pull-right text-muted text-sm">{{ $notification->created_at->diffForHumans() }}</span>
+                  </a>
+                  @empty
+                    <span class="ml-3 pull-right text-muted text-sm">Sin notificaciones leidas                      </span>
+                  @endforelse
+
+                  
+                  <div class="dropdown-divider"></div>
+                  <a href="{{ route('markAsRead') }}" class="dropdown-item dropdown-footer">Mark all as read</a>
+                </div>
+              </li>
+              </ul>
+      
         </li>
             <!-- User Menu-->
         <li class="dropdown"><a class="app-nav__item" href="#" data-bs-toggle="dropdown" aria-label="Open Profile Menu"><i class="bi bi-person fs-4"></i></a>
           <ul class="dropdown-menu settings-menu dropdown-menu-right">
             
             <li><a class="dropdown-item" href=""><i class="bi bi-gear me-2 fs-5"></i> {{ Auth::user()->name }}</a></li>
-            <li><a class="dropdown-item" href=""><i class="bi bi-person me-2 fs-5"></i> Perfil</a></li>
+            <li @click="menu=101"><a class="dropdown-item" href=""><i class="bi bi-person me-2 fs-5"></i> Perfil</a></li>
             <li><a class="dropdown-item" href=""
                        onclick="event.preventDefault();
                        document.getElementById('logout-form').submit();"><i class="fa fa-sign-out fa-lg"></i> {{ __('Salir') }}</a>

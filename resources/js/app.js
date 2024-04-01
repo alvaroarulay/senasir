@@ -23,6 +23,8 @@ import RepAsig from './components/RepAsignaciones.vue'
 import RepLogs from './components/RepLogs.vue'
 import HistorialAsig from './components/HistorialAsignaciones.vue'
 import bbdd from './components/bbdd.vue'
+import profile from './components/userProfile.vue'
+import post from './components/post.vue'
 const app = createApp({ 
   setup() {
   return {
@@ -54,6 +56,8 @@ app.component("repasignaciones",RepAsig);
 app.component("replogs",RepLogs);
 app.component("historialasignaciones",HistorialAsig);
 app.component("bbdd",bbdd);
+app.component("profile",profile);
+app.component("post",post);
 const vfm = createVfm()
 app.use(vfm).mount('#app')
 

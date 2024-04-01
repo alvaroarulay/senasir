@@ -2,6 +2,12 @@
 @section('content')
 @if(Auth::check())
     @if (Auth::user()->idrol == 1)
+    <template v-if="menu==101">
+        <profile></profile>
+    </template>
+    <template v-if="menu==102">
+        <post></post>
+    </template>
     <template v-if="menu==0">
         <escritorio></escritorio>
     </template>
@@ -108,6 +114,12 @@
         </main>
     </template>
     @elseif (Auth::user()->idrol == 2)
+    <template v-if="menu==101">
+        <profile></profile>
+    </template>
+    <template v-if="menu==102">
+        <post></post>
+    </template>
     <template v-if="menu==0">
         <escritorio></escritorio>
     </template>
